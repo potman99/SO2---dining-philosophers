@@ -4,6 +4,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <time.h>
+#include <ncurses.h>
 
 #define THINKING 0
 #define HUNGRY 1
@@ -45,8 +46,13 @@ void intiData(){
 void eat(int philosopherId){
     philosopherState[philosopherId] = EATING;
     sleep(rand()%SLEEP_TIME);
-    printf("Philosopher [%d] takes fork [%d] and [%d]\n", philosopherId + 1, LEFT + 1, philosopherId + 1);
-    printf("Philosopher [%d] is eating\n", philosopherId + 1);
+    //printf("Philosopher [%d] takes fork [%d] and [%d]\n", philosopherId + 1, LEFT + 1, philosopherId + 1);
+    //printf("Philosopher [%d] is eating\n", philosopherId + 1);
+    mvprintw(philosopherId*2, 40, "Takes fork [%d] and [%d]",  LEFT + 1, philosopherId + 1);
+    mvprintw(philosopherId*2, 20, "PREPARE TO EATING");
+    sleep(1);
+    mvprintw(philosopherId*2, 20, "EATING");
+    refresh();
 
     sem_post(&semaphore[philosopherId]);
 }
@@ -67,7 +73,9 @@ void takeChopsticks(int philosopherId){
     pthread_mutex_lock(&mutex);
     // Set state to HUNGRY
     philosopherState[philosopherId] = HUNGRY;
-    printf("Philosopher [%d] is hungry\n",philosopherId+1);
+    //printf("Philosopher [%d] is hungry\n",philosopherId+1);
+    mvprintw(philosopherId*2, 20, "HUNGRY");
+    refresh();
     // Check wheather neighbours are eating
     checkChopsticks(philosopherId);
     pthread_mutex_unlock(&mutex);
@@ -81,8 +89,13 @@ void putChopstick(int philosopherId){
     pthread_mutex_lock(&mutex);
     // Set state to THINKING
     philosopherState[philosopherId] = THINKING;
-    printf("Philosopher [%d] put back chopsticks [%d] and [%d]\n", philosopherId + 1, LEFT + 1, philosopherId + 1);
-    printf("Philosopher [%d] is thinking\n",philosopherId + 1 );
+    //printf("Philosopher [%d] put back chopsticks [%d] and [%d]\n", philosopherId + 1, LEFT + 1, philosopherId + 1);
+    //printf("Philosopher [%d] is thinking\n",philosopherId + 1 );
+    mvprintw(philosopherId*2, 20, "FINISH EATING");
+    sleep(1);
+    mvprintw(philosopherId*2, 40, "Put back chopsticks [%d] and [%d]\n", LEFT + 1, philosopherId + 1);
+    mvprintw(philosopherId*2, 20, "THINKING");
+    refresh();
 
     checkChopsticks(LEFT);
     checkChopsticks(RIGHT);
@@ -106,8 +119,15 @@ void * philosopher(int* philosopherId){
 
 int main(){ 
 
-    
     intiData();
+    initscr();			/* Start curses mode 		  */
+	
+    for(int i=0 ; i< PHILOSOPHERS_NUMBER; i++){
+        mvprintw(i*2,0,"Philosopher [%d]", i+1);
+    }
+	
+    
+
    
 
     for (int i = 0; i < PHILOSOPHERS_NUMBER; i++)
@@ -132,6 +152,9 @@ int main(){
     free(thread);
     free(semaphore);
     pthread_mutex_destroy(&mutex);
+
+    getch();			/* Wait for user input */
+	endwin();			/* End curses mode		  */
 
     return 0;
 }
