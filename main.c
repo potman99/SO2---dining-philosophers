@@ -46,11 +46,13 @@ void intiData(){
 void eat(int philosopherId){
     philosopherState[philosopherId] = EATING;
     sleep(rand()%SLEEP_TIME);
-    //printf("Philosopher [%d] takes fork [%d] and [%d]\n", philosopherId + 1, LEFT + 1, philosopherId + 1);
-    //printf("Philosopher [%d] is eating\n", philosopherId + 1);
-    mvprintw(philosopherId*2, 40, "Takes fork [%d] and [%d]",  LEFT + 1, philosopherId + 1);
+   
+    mvprintw(philosopherId*2, 40, "Takes chopsticks [%d] and [%d]",  LEFT + 1, philosopherId + 1);
     mvprintw(philosopherId*2, 20, "PREPARE TO EATING");
-    sleep(1);
+    refresh();
+    sleep(3);
+    move(philosopherId*2,20);
+    clrtoeol();
     mvprintw(philosopherId*2, 20, "EATING");
     refresh();
 
@@ -73,7 +75,8 @@ void takeChopsticks(int philosopherId){
     pthread_mutex_lock(&mutex);
     // Set state to HUNGRY
     philosopherState[philosopherId] = HUNGRY;
-    //printf("Philosopher [%d] is hungry\n",philosopherId+1);
+    move(philosopherId*2,20);
+    clrtoeol();
     mvprintw(philosopherId*2, 20, "HUNGRY");
     refresh();
     // Check wheather neighbours are eating
@@ -89,11 +92,13 @@ void putChopstick(int philosopherId){
     pthread_mutex_lock(&mutex);
     // Set state to THINKING
     philosopherState[philosopherId] = THINKING;
-    //printf("Philosopher [%d] put back chopsticks [%d] and [%d]\n", philosopherId + 1, LEFT + 1, philosopherId + 1);
-    //printf("Philosopher [%d] is thinking\n",philosopherId + 1 );
+  
     mvprintw(philosopherId*2, 20, "FINISH EATING");
-    sleep(1);
     mvprintw(philosopherId*2, 40, "Put back chopsticks [%d] and [%d]\n", LEFT + 1, philosopherId + 1);
+    refresh();
+    sleep(3);
+    move(philosopherId*2,20);
+    clrtoeol();
     mvprintw(philosopherId*2, 20, "THINKING");
     refresh();
 
