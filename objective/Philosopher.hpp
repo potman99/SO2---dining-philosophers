@@ -7,6 +7,8 @@
 #include <ctime>
 #include <unistd.h>
 #include <iostream>
+#include <atomic>
+#include "Chopstick.hpp"
 
 enum states{THINKING,HUNGRY,EATING};
 
@@ -15,27 +17,22 @@ class Philosopher{
     private:
         int id;
         states state;
-        std::thread thread;
+        
         int sleep_time = 6;
+        int eating_time = 6;
+        
+        bool hasLeft;
+        bool hasRight;
+        
+        Chopstick* leftChopstick;
+        Chopstick* rightChopstick;
+        
+        std::atomic_bool isEating = {true};
+        std::unique_ptr<std::thread> thread;
+
+
 
     public:
-        Philosopher(int id);
-
-        void start();
-        void run();
-        void wait();
-        void eat();
-        void think();
-        std::string getStateString();
-
-
-        int getId(){
-            return id;
-        }
-
-        states getState(){
-            return state;
-        }
-
+       
 
 };

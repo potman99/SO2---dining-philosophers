@@ -4,28 +4,18 @@
 class Chopstick{
 
     private:
-        int id;
-        int owner;
-        bool dirty = true;
+        
+        bool available = true;
+        int priority;
         std::mutex mutex;
 
     public:
-        Chopstick(int chopstickId, int ownerId);
-        void finishMeal();
-        void askForChopstick(int ownerId);
 
-        std::mutex& getMutex(){
-            return mutex;
-        }
-
-        int getId(){
-            return id;
-        }
-
-        int getOwner(){
-            return owner;
-        }
-
+        Chopstick(int);
+        int getPriority();
+        void setAvailable(bool);
+        bool takeChopstick();
+    
     
 
 };

@@ -7,8 +7,7 @@ class Table
 private:
     bool isDinner;
 public:
-    void startDinner();
-    void stopDinner();
-    bool getIsDinner();
+    
+
 };
 

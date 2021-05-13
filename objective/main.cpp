@@ -7,12 +7,11 @@ using namespace std;
 
 int main(){
 
-    //Chopstick c =  Chopstick(1,99);
-    Philosopher p = Philosopher(1);
-    cout<<"Hello: "<< p.getId()<<endl;
-    p.think();
-    cout<<"State: "<<p.getStateString()<<endl;
-    //c.getMutex();
+    int philosophersNumber = 0;
+    
+    cout<<"Number of philosophers: ";
+    cin >> philosophersNumber;
+    
 
     return 0;
 }

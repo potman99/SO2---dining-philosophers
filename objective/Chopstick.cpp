@@ -1,25 +1,27 @@
 #include "Chopstick.hpp"
 
-Chopstick::Chopstick(int chopstickId, int ownerId){
-    id = chopstickId;
-    owner = ownerId;
-    dirty = true;
+Chopstick::Chopstick(int priority){
+    this->priority = priority;
 }
 
-void Chopstick::askForChopstick(int ownerId){
+int Chopstick::getPriority(){
+    return this->priority;
+}
 
-    while (owner != ownerId)
-    {
-        if(dirty){
-            std::scoped_lock<std::mutex> lock(mutex);
-            dirty = false;
-            owner = ownerId;
+void Chopstick::setAvailable(bool availabilty){
 
-        }
+    std::lock_guard<std::mutex> lock(mutex);
+    this->available = availabilty;
+}
 
-        else{
-            
-        }
+bool Chopstick::takeChopstick(){
+
+    std::lock_guard<std::mutex> lock(mutex);
+    if(this->available){
+        this->available = false;
+        return true;
     }
-    
+    else{
+        return false;
+    }
 }
