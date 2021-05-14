@@ -16,16 +16,17 @@ void Chopstick::setAvailable(bool availabilty){
 
 bool Chopstick::takeChopstick(){
     
-    printf("Taking chopa\n");
-    
-    std::lock_guard<std::mutex> lock(chopstickMutex);
-    /*
+     std::lock_guard<std::mutex> lock(chopstickMutex);
     if(this->available){
+
+        
         this->available = false;
         return true;
     }
     else{
+        
         return false;
-    }*/
-    return true;
+    }
+
+
 }

@@ -4,11 +4,11 @@ Philosopher::Philosopher( int id){
     this->id=id;
 }
 
-void Philosopher::startEating(){
-    
+void Philosopher::startEatingThread(){
+    thread = std::make_unique<std::thread>([this](){startDinning();});
 }
 
-void Philosopher::endEating(){
+void Philosopher::endEatingThread(){
     this->isDining = false;
     this->thread->join();
 }
@@ -22,26 +22,32 @@ void Philosopher::takeRightChopstick(Chopstick *chopstick){
 }
 
 void Philosopher::releaseLeftChopstick(){
-    this->leftChopstick->setAvailable(true);
+    
     this->hasLeft = false;
+    this->leftChopstick->setAvailable(true);
 }
 
 void Philosopher::releaseRightChopstick(){
+
+     this->hasRight = false;
     this->rightChopstick->setAvailable(true);
-    this->hasRight = false;
 }
 
 void Philosopher::eat(){
 
     this->state = EATING;
-    std::this_thread::sleep_for(std::chrono::milliseconds(this->eatingTime));
+    int eatingTime = rand() % this->time_variable;
+    std::this_thread::sleep_for(std::chrono::milliseconds(eatingTime));
+    this->eatingTimeCounter += eatingTime;
     this->eatingCounter++;
     releaseLeftChopstick();
     releaseRightChopstick();
 
     this->state = THINKING;
     this->info = "Philosopher: " + std::to_string(this->id) + " is thinking";
-    std::this_thread::sleep_for(std::chrono::milliseconds(this->thinkingTime));
+    int thinkingTime = rand() % this->time_variable;
+    std::this_thread::sleep_for(std::chrono::milliseconds(thinkingTime));
+    this->thinkingTimeCounter += thinkingTime;
 
 
 }
@@ -50,45 +56,96 @@ void Philosopher::startDinning(){
     
     while(this->isDining.load()){
 
-        if(!this->leftChopstick){
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        if(this->leftChopstick->getId() < this->rightChopstick->getId()){
+
+            if(!this->hasLeft){
             
-            if(this->leftChopstick->takeChopstick()){
-                printf("Check left\n");
-                //this->hasLeft = true;
-                //this->info = "Philosopher: " + std::to_string(this->id) + "has taken chopstick: " + std::to_string(this->leftChopstick->getId());
+                if(this->leftChopstick->takeChopstick()){
+                    this->hasLeft = true;
+                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: " + std::to_string(this->leftChopstick->getId());
+                   
+                }
+                else{
+                     this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
+                    int waitingTime = rand() % this->time_variable;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
+                    this->waitingTimeCounter += waitingTime;
+                   
+                }
+            }
+            else if(!this->hasRight){
+
+                if(this->rightChopstick->takeChopstick()){
+                    this->hasRight = true;
+                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: "+ std::to_string(this->rightChopstick->getId());
+               
+                }
+                else{
+                    this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
+                    int waitingTime = rand() % this->time_variable;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
+                    this->waitingTimeCounter += waitingTime;
+
+                }
             }
             else{
-                //this->state = WAITING;
-                //this->info = "Philosopher: " + std::to_string(this->id) + " is waiting";
+                this->info = "Philosopher: " + std::to_string(this->getId()) + " is eating";
+                eat();
             }
-            
-        }
-        else if(!this->rightChopstick->takeChopstick()){
-            printf("check right");
-            /*
-            if(this->rightChopstick->takeChopstick()){
-                //this->hasRight = true;
-                //this->info = "Philosopher: " + std::to_string(this->id) + "has taken chopstick: " + std::to_string(this->rightChopstick->getId());
-            }
-            else{
-                //this->state = WAITING;
-                //this->info = "Philosopher: " + std::to_string(this->id) + " is waiting";
-            }
-            */
         }
         else{
-            eat();
+             if(!this->hasRight){
+            
+                if(this->rightChopstick->takeChopstick()){
+                    this->hasRight = true;
+                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: " + std::to_string(this->rightChopstick->getId());
+                   
+                }
+                else{
+                     this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
+                    int waitingTime = rand() % this->time_variable;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
+                    this->waitingTimeCounter += waitingTime;
+                    
+                }
+            }
+            else if(!this->hasLeft){
+
+                if(this->leftChopstick->takeChopstick()){
+                    this->hasLeft = true;
+                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: " + std::to_string(this->leftChopstick->getId());
+                
+                }
+                else{
+                     this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
+                    int waitingTime = rand() % this->time_variable;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
+                    this->waitingTimeCounter += waitingTime;
+                }
+            }
+            else{
+                this->info = "Philosopher: " + std::to_string(this->getId()) + " is eating";
+                eat();
+            }
         }
+
+        
     }
 }
 
 
 int Philosopher::getEatingTime(){
-    return this->eatingTime;
+    return this->eatingTimeCounter;
+}
+
+int Philosopher::getThinkingTime(){
+    return this->thinkingTimeCounter;
 }
 
 int Philosopher::getWaitingTime(){
-    return this->waitingTime;
+    return this->waitingTimeCounter;
 }
 
 int Philosopher :: getEatingCounter(){
@@ -97,4 +154,8 @@ int Philosopher :: getEatingCounter(){
 
 int Philosopher::getId(){
     return this->id;
+}
+
+std::string Philosopher::getInfo(){
+    return this->info;
 }

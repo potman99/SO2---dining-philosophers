@@ -1,7 +1,7 @@
 all: main
 
-main: main.cpp Chopstick.cpp Philosopher.cpp
-	g++ -std=c++11 -pthread -Wall *.cpp -o main -lncurses
+main: main.cpp Chopstick.cpp Philosopher.cpp Table.cpp
+	g++ -std=c++14 -pthread -Wall *.cpp -o main -lncurses && ./main
 
 clear:
 	rm main

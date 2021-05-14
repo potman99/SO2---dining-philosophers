@@ -22,9 +22,10 @@ class Philosopher{
         states state;
         std::string info;
         
-        int waitingTime = 6;
-        int eatingTime = 6;
-        int thinkingTime = 6;
+        int time_variable = 5000;
+        int waitingTimeCounter = 0;
+        int eatingTimeCounter = 0;
+        int thinkingTimeCounter = 0;
         int eatingCounter = 0;
         
         bool hasLeft;
@@ -42,8 +43,8 @@ class Philosopher{
 
         Philosopher(int);
         
-        void startEating();
-        void endEating();
+        void startEatingThread();
+        void endEatingThread();
 
         void takeLeftChopstick(Chopstick*);
         void takeRightChopstick(Chopstick*);
@@ -57,7 +58,9 @@ class Philosopher{
         int getEatingCounter();
         int getWaitingTime();
         int getEatingTime();
+        int getThinkingTime();
         states getState();
+        std::string getInfo();
        
 
 };

@@ -3,23 +3,38 @@
 #include "Chopstick.hpp"
 #include "Philosopher.hpp"
 #include "Table.hpp"
+#include <ncurses.h>
+//#include <time.h>
+
 
 using namespace std;
 
 int main(){
 
+    srand(time(NULL));
+
     Table table;
-    int philosophersNumber = 0;
-    
-    cout<<"Number of philosophers: ";
+    int philosophersNumber;
+
+    cout<<"Enter number of dinning philosophers:";
     cin >> philosophersNumber;
 
+    cout<<"Number: "<<philosophersNumber;
+
+
+  
     table.prepareTable(philosophersNumber);
+
+    
+
+    initscr();
     table.startDinner();
 
-    while(true){
-        cout<<"dinner"<<endl;
+    int c;
+    while((c=getch()) != 27){
+        
     }
+    endwin();
     table.endDinner();
     
 

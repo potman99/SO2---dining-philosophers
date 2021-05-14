@@ -2,6 +2,8 @@
 #include "Philosopher.hpp"
 #include "Chopstick.hpp"
 #include <vector>
+#include <ncurses.h>
+#include <string>
 
 class Table
 {
@@ -10,6 +12,7 @@ private:
 
     std::vector<Philosopher*> philosophers;
     std::vector<Chopstick*> chopsticks;
+    std::unique_ptr<std::thread> infoThread;
 
 public:
 
