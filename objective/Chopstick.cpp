@@ -1,27 +1,31 @@
 #include "Chopstick.hpp"
 
-Chopstick::Chopstick(int priority){
-    this->priority = priority;
+Chopstick::Chopstick(int id){
+    this->id = id;
 }
 
-int Chopstick::getPriority(){
-    return this->priority;
+int Chopstick::getId(){
+    return this->id;
 }
 
 void Chopstick::setAvailable(bool availabilty){
 
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock(chopstickMutex);
     this->available = availabilty;
 }
 
 bool Chopstick::takeChopstick(){
-
-    std::lock_guard<std::mutex> lock(mutex);
+    
+    printf("Taking chopa\n");
+    
+    std::lock_guard<std::mutex> lock(chopstickMutex);
+    /*
     if(this->available){
         this->available = false;
         return true;
     }
     else{
         return false;
-    }
+    }*/
+    return true;
 }

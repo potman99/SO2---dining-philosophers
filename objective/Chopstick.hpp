@@ -6,13 +6,13 @@ class Chopstick{
     private:
         
         bool available = true;
-        int priority;
-        std::mutex mutex;
+        int id;
+        std::mutex chopstickMutex;
 
     public:
 
         Chopstick(int);
-        int getPriority();
+        int getId();
         void setAvailable(bool);
         bool takeChopstick();
     
