@@ -1,161 +1,130 @@
 #include "Philosopher.hpp"
+#include <ncurses.h>
 
-Philosopher::Philosopher( int id){
-    this->id=id;
+
+Philosopher::Philosopher(int _id, Fork* left, Fork* right):
+    id(_id),leftFork(left),
+    rightFork(right),
+    state(States::Wait),
+    thread(&Philosopher::run, this),
+    keepRunning(true),
+    eatingCounter(0),
+    eatingTime(0),
+    waitingTime(0),
+    thinkingTime(0)
+    {}
+
+
+
+Philosopher::~Philosopher(){
+    this->thread.join();
+    printf("Philosopher [%d]",id);
 }
 
-void Philosopher::startEatingThread(){
-    thread = std::make_unique<std::thread>([this](){startDinning();});
-}
+void Philosopher::run(){
 
-void Philosopher::endEatingThread(){
-    this->isDining = false;
-    this->thread->join();
-}
+    while (this->keepRunning){
 
-void Philosopher::takeLeftChopstick(Chopstick *chopstick){
-    this->leftChopstick = chopstick;
-}
-
-void Philosopher::takeRightChopstick(Chopstick *chopstick){
-    this->rightChopstick = chopstick;
-}
-
-void Philosopher::releaseLeftChopstick(){
+        wait();
+        takeForks();
+        eat();
+        releaseForks();
+        think();
+    }
     
-    this->hasLeft = false;
-    this->leftChopstick->setAvailable(true);
 }
 
-void Philosopher::releaseRightChopstick(){
+void Philosopher::takeForks(){
+    if(this->leftFork->getID() < this->rightFork->getID()){
 
-     this->hasRight = false;
-    this->rightChopstick->setAvailable(true);
-}
-
-void Philosopher::eat(){
-
-    this->state = EATING;
-    int eatingTime = rand() % this->time_variable;
-    std::this_thread::sleep_for(std::chrono::milliseconds(eatingTime));
-    this->eatingTimeCounter += eatingTime;
-    this->eatingCounter++;
-    releaseLeftChopstick();
-    releaseRightChopstick();
-
-    this->state = THINKING;
-    this->info = "Philosopher: " + std::to_string(this->id) + " is thinking";
-    int thinkingTime = rand() % this->time_variable;
-    std::this_thread::sleep_for(std::chrono::milliseconds(thinkingTime));
-    this->thinkingTimeCounter += thinkingTime;
-
-
-}
-
-void Philosopher::startDinning(){
-    
-    while(this->isDining.load()){
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-        if(this->leftChopstick->getId() < this->rightChopstick->getId()){
-
-            if(!this->hasLeft){
-            
-                if(this->leftChopstick->takeChopstick()){
-                    this->hasLeft = true;
-                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: " + std::to_string(this->leftChopstick->getId());
-                   
-                }
-                else{
-                     this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
-                    int waitingTime = rand() % this->time_variable;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
-                    this->waitingTimeCounter += waitingTime;
-                   
-                }
-            }
-            else if(!this->hasRight){
-
-                if(this->rightChopstick->takeChopstick()){
-                    this->hasRight = true;
-                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: "+ std::to_string(this->rightChopstick->getId());
-               
-                }
-                else{
-                    this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
-                    int waitingTime = rand() % this->time_variable;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
-                    this->waitingTimeCounter += waitingTime;
-
-                }
-            }
-            else{
-                this->info = "Philosopher: " + std::to_string(this->getId()) + " is eating";
-                eat();
-            }
-        }
-        else{
-             if(!this->hasRight){
-            
-                if(this->rightChopstick->takeChopstick()){
-                    this->hasRight = true;
-                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: " + std::to_string(this->rightChopstick->getId());
-                   
-                }
-                else{
-                     this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
-                    int waitingTime = rand() % this->time_variable;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
-                    this->waitingTimeCounter += waitingTime;
-                    
-                }
-            }
-            else if(!this->hasLeft){
-
-                if(this->leftChopstick->takeChopstick()){
-                    this->hasLeft = true;
-                    this->info = "Philosopher: " + std::to_string(this->getId()) + " has taken chopstick: " + std::to_string(this->leftChopstick->getId());
-                
-                }
-                else{
-                     this->info = "Philosopher: " + std::to_string(this->getId()) + " is waiting";
-                    int waitingTime = rand() % this->time_variable;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(waitingTime));
-                    this->waitingTimeCounter += waitingTime;
-                }
-            }
-            else{
-                this->info = "Philosopher: " + std::to_string(this->getId()) + " is eating";
-                eat();
-            }
-        }
-
-        
+        this->leftFork->take();
+        this->state = States::LeftForkAquired;
+        this->rightFork->take();
+    }
+    else{
+        this->rightFork->take();
+        this->state = States::RightForkAquired;
+        this->leftFork->take();
     }
 }
 
 
-int Philosopher::getEatingTime(){
-    return this->eatingTimeCounter;
+void Philosopher::releaseForks() {
+    if(this->leftFork->getID() < this->rightFork->getID()) {
+        // release right fork first
+        this->rightFork->release();
+        this->state = States::LeftForkAquired;
+        this->leftFork->release();
+
+    } else {
+        // release left fork first
+        this->leftFork->release();
+        this->state = States::RightForkAquired;
+        this->rightFork->release();
+    }
 }
 
-int Philosopher::getThinkingTime(){
-    return this->thinkingTimeCounter;
+
+void Philosopher::stop(){
+    this->keepRunning = false;
 }
 
-int Philosopher::getWaitingTime(){
-    return this->waitingTimeCounter;
+void Philosopher::eat(){
+    
+    state = States::Eat;
+    int time = randomTime();
+    this->eatingTime += time/1000;
+    eatingCounter++;
+    usleep(time);
+
+
+
+
+
 }
 
-int Philosopher :: getEatingCounter(){
-    return this->eatingCounter;
+void Philosopher::wait(){
+
+    this->state = States::Wait;
+    int time = randomTime();
+    this->waitingTime += time/1000;
+    usleep(time);
+}
+
+void Philosopher::think(){
+
+    this->state = States::Think;
+    int time = randomTime();
+    this->thinkingTime += time/1000;
+    usleep(time);
 }
 
 int Philosopher::getId(){
-    return this->id;
+    return id;
 }
 
-std::string Philosopher::getInfo(){
-    return this->info;
+States Philosopher::getState(){
+    return state;
+}
+
+int Philosopher::getEatingCounter(){
+    return eatingCounter;
+}
+
+int Philosopher::getWaitingTime(){
+    return waitingTime;
+}
+
+int Philosopher::getEatingTime(){
+    return eatingTime;
+}
+
+int Philosopher::getThinkingTime(){
+    return thinkingTime;
+}
+
+
+int Philosopher::randomTime(){
+    int randomNumber = (rand() % 3000000) + 2000000;
+    return randomNumber;
 }

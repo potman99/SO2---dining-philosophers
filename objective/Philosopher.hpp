@@ -1,66 +1,47 @@
 #pragma once
+#include "Fork.hpp"
+#include "States.hpp"
 #include <thread>
-#include <mutex>
-#include <string>
-#include <chrono>
-#include <cstdlib>
-#include <ctime>
-#include <utility>
-#include <memory>
-#include <unistd.h>
-#include <iostream>
 #include <atomic>
-#include "Chopstick.hpp"
-
-
-enum states{THINKING,WAITING,EATING};
-
-class Philosopher{
-
-    private:
-        int id;
-        states state;
-        std::string info;
-        
-        int time_variable = 5000;
-        int waitingTimeCounter = 0;
-        int eatingTimeCounter = 0;
-        int thinkingTimeCounter = 0;
-        int eatingCounter = 0;
-        
-        bool hasLeft;
-        bool hasRight;
-        
-        Chopstick* leftChopstick;
-        Chopstick* rightChopstick;
-        
-        std::atomic_bool isDining = {true};
-        std::unique_ptr<std::thread> thread;
+#include <string>
+#include <unistd.h>
 
 
 
-    public:
+class Philosopher
+{
+private:
 
-        Philosopher(int);
-        
-        void startEatingThread();
-        void endEatingThread();
+    int id;
+    int eatingCounter;
+    int eatingTime;
+    int waitingTime;
+    int thinkingTime;
+    Fork* leftFork;
+    Fork* rightFork;
+    std::thread thread;
+    States state;
+    std::atomic_bool keepRunning;
 
-        void takeLeftChopstick(Chopstick*);
-        void takeRightChopstick(Chopstick*);
+public:
+    Philosopher(int id, Fork* left, Fork* right);
+    ~Philosopher();
 
-        void releaseLeftChopstick();
-        void releaseRightChopstick();
-        void startDinning();
-        void eat();
+    void run();
+    void eat();
+    void wait();
+    void think();
+    void stop();
+    void takeForks();
+    void releaseForks();
+   
+    int getId();
+    States getState();
+    int getEatingCounter();
+    int getWaitingTime();
+    int getEatingTime();
+    int getThinkingTime();
 
-        int getId();
-        int getEatingCounter();
-        int getWaitingTime();
-        int getEatingTime();
-        int getThinkingTime();
-        states getState();
-        std::string getInfo();
-       
-
+    int randomTime();
 };
+

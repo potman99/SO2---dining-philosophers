@@ -1,76 +1,71 @@
 #include "Table.hpp"
 
-void Table::prepareTable(int philosophersNumber){
+void Table::prepareTable(int number){
     
-    for(int i=0; i<philosophersNumber; i++){
-        this->philosophers.push_back(new Philosopher(i));
-        this->chopsticks.push_back(new Chopstick(i));
+    this->philNumber = number;
+    this->keepRunning = true;
+
+    for(int i=0; i<philNumber; i++){
+        this->forks.push_back(new Fork(i));
     }
 
-    for(int i=0; i<philosophersNumber; i++){
-        this->philosophers[i]->takeLeftChopstick(this->chopsticks[i]);
-        this->philosophers[i]->takeRightChopstick(this->chopsticks[(philosophersNumber - 1 + i) % philosophersNumber]);
+    for(int i=0; i<philNumber; i++){
+        this->philosophers.push_back(new Philosopher(i,forks[i],forks[(i + 1) % philNumber]));
     }
+
+   
+    displayThread = std::thread(&Table::display, this);
+   
 }
 
-void Table::startDinner(){
 
-    for(Philosopher* p : this->philosophers){
-        p->startEatingThread();
+void Table::endDinner(){
+
+    for(Philosopher* p: this->philosophers){
+        
+        p->stop();
     }
 
-    bool isEveroneReady = false;
+    keepRunning = false;
 
-    while(!isEveroneReady){
+}
 
-        for(Philosopher* p : this->philosophers){
+void Table::display(){
 
-            if(!p->getInfo().empty()) isEveroneReady = true;
-            else isEveroneReady = false;
-        }
-    }
-    
-    infoThread = std::make_unique<std::thread>([this](){
-        while(this->isDinner){
-            for(Philosopher* p: this->philosophers){
+    while (keepRunning)
+    {
+         for(Philosopher* p: this->philosophers){
+
+                std::string info = stateToString(p->getState());
                 
                 mvprintw(0,0,"PHILOSOPHERS");
                 mvprintw(0,40,"EATING COUNTER");
                 mvprintw(0,60,"EATING TIME");
                 mvprintw(0,80,"WAITING TIME");
                 mvprintw(0,100,"THINKING TIME");
-                mvprintw((p->getId()+1)*2, 0,"%s", p->getInfo().c_str());
+                mvprintw((p->getId()+1)*2, 0,"%d %s", p->getId(), info.c_str());
                 clrtoeol();
                 mvprintw((p->getId()+1)*2, 40,"eaten %d times", p->getEatingCounter());
                 mvprintw((p->getId()+1)*2, 60,"%d ms", p->getEatingTime());
                 mvprintw((p->getId()+1)*2, 80,"%d ms", p->getWaitingTime());
                 mvprintw((p->getId()+1)*2, 100,"%d ms", p->getThinkingTime());
+
                
             }
-                
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(150));
-                refresh();
-            }
-        
-    });
+               refresh();
+    }
     
 
-    
 
+            
+    
 }
 
-void Table::endDinner(){
+void Table::cleanUpDinner(){
 
-    
-    for(Philosopher* p : this->philosophers){
-        p->endEatingThread();
-    }
-
-    this->isDinner = false;
-    infoThread->join();
-
-    for(Chopstick* c : this->chopsticks){
-        delete c;
-    }
+    forks.clear();
+    philosophers.clear();
+    displayThread.join();  
+  
 }

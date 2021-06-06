@@ -1,42 +1,32 @@
-#include <iostream>
-#include <stdlib.h>
-#include "Chopstick.hpp"
-#include "Philosopher.hpp"
+#include <stdio.h>
 #include "Table.hpp"
 #include <ncurses.h>
-//#include <time.h>
 
 
-using namespace std;
+int main(int argc, char const *argv[])
+{
+    srand((unsigned) time(0));
 
-int main(){
 
-    srand(time(NULL));
-
+    printf("Elo");
+    int number = 10;
     Table table;
-    int philosophersNumber;
-
-    cout<<"Enter number of dinning philosophers:";
-    cin >> philosophersNumber;
-
-    cout<<"Number: "<<philosophersNumber;
-
-
-  
-    table.prepareTable(philosophersNumber);
-
-    
 
     initscr();
-    table.startDinner();
+    cbreak();
+    noecho();
+    table.prepareTable(number);
 
-    int c;
-    while((c=getch()) != 27){
+    while (getch() != 27) {
         
     }
     endwin();
-    table.endDinner();
-    
 
+
+
+    table.endDinner();
+    table.cleanUpDinner();
+    printf("END");
+    
     return 0;
 }

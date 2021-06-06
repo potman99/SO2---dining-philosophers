@@ -1,6 +1,7 @@
 #pragma once
 #include "Philosopher.hpp"
-#include "Chopstick.hpp"
+#include "Fork.hpp"
+#include <thread>
 #include <vector>
 #include <ncurses.h>
 #include <string>
@@ -8,18 +9,16 @@
 class Table
 {
 private:
-    std::atomic_bool isDinner = {true} ;
-
+    int philNumber;
+    bool keepRunning;
     std::vector<Philosopher*> philosophers;
-    std::vector<Chopstick*> chopsticks;
-    std::unique_ptr<std::thread> infoThread;
-
+    std::vector<Fork*> forks;
+    std::thread displayThread;
 public:
-
-    void prepareTable(int);
-    void startDinner();
+    void prepareTable(int number);
     void endDinner();
-    
-
+    void cleanUpDinner();
+    void display();
+   
 };
 
